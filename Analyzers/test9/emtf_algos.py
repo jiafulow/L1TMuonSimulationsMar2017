@@ -10,7 +10,7 @@ from emtf_utils import *
 
 
 # ______________________________________________________________________________
-# Constants
+# Configs
 
 # 2 endcaps, 6 sectors per endcap. 3 zones and 3 timezones per sector.
 num_emtf_sectors = 12

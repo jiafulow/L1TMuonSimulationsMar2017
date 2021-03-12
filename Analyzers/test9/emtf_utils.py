@@ -18,6 +18,29 @@ kDT, kCSC, kRPC, kGEM, kME0 = 0, 1, 2, 3, 4
 kDEBUG, kINFO, kWARNING, kERROR, kFATAL = 0, 1, 2, 3, 4
 
 # ______________________________________________________________________________
+# Configs
+
+def create_assist_module():
+  def floatx():
+    return 'float32'
+  def epsilon():
+    return 1e-7
+  def image_data_format():
+    return 'channels_last'
+  def ma_fill_value():
+    return 999999
+
+  import types
+  assist = types.ModuleType('assist')
+  setattr(assist, 'floatx', floatx)
+  setattr(assist, 'epsilon', epsilon)
+  setattr(assist, 'image_data_format', image_data_format)
+  setattr(assist, 'ma_fill_value', ma_fill_value)
+  return assist
+
+assist = create_assist_module()
+
+# ______________________________________________________________________________
 # Functions
 
 def wrap_phi_rad(x):
@@ -118,6 +141,26 @@ def calc_eta_from_theta_deg(theta_deg, endcap):
   if endcap == -1:
     eta = -eta
   return eta
+
+def calc_ns_from_mhz(mhz):
+  return 1e3 / mhz
+
+def calc_mhz_from_ns(ns):
+  return 1e3 / ns
+
+def calc_quant_scale(num_bits, num_int_bits):
+  return 1.0 / (1 << (num_bits - num_int_bits))
+
+def calc_quant_range(num_bits, num_int_bits, narrow_range=False):
+  quant_min = 1 if narrow_range else 0
+  quant_max = (1 << num_bits) - 1
+  zero_point = (quant_max - quant_min + 1) // 2
+  zero_point_from_min = quant_min + zero_point
+  range_min = quant_min - zero_point_from_min
+  range_max = quant_max - zero_point_from_min
+  range_min /= (1 << (num_bits - num_int_bits))
+  range_max /= (1 << (num_bits - num_int_bits))
+  return (range_min, range_max)
 
 def get_trigger_sector(ring, station, chamber):
   result = np.uint32(0)
